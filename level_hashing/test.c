@@ -15,8 +15,14 @@ int main(int argc, char* argv[])
 
     for (i = 1; i < insert_num + 1; i ++)
     {
-        snprintf(key, KEY_LEN, "%ld", i);
-        snprintf(value, VALUE_LEN, "%ld", i);
+        *(uint32_t*)key = i;
+        *(uint32_t*)value = i;
+        //snprintf(key, KEY_LEN, "%ld", i);
+        //snprintf(value, VALUE_LEN, "%ld", i);
+        if(level_static_query(level, key)) {
+            printf("Key %d already exist\n", i);
+            continue;
+	}
         if (!level_insert(level, key, value))                               
         {
             inserted ++;
@@ -35,7 +41,8 @@ int main(int argc, char* argv[])
     printf("The static search test begins ...\n");
     for (i = 1; i < insert_num + 1; i ++)
     {
-        snprintf(key, KEY_LEN, "%ld", i);
+        //snprintf(key, KEY_LEN, "%ld", i);
+        *(uint32_t*)key = i;
         uint8_t* get_value = level_static_query(level, key);
         if(get_value == NULL)
             printf("Search the key %s: ERROR! \n", key);
@@ -44,7 +51,8 @@ int main(int argc, char* argv[])
     printf("The dynamic search test begins ...\n");
     for (i = 1; i < insert_num + 1; i ++)
     {
-        snprintf(key, KEY_LEN, "%ld", i);
+        //snprintf(key, KEY_LEN, "%ld", i);
+        *(uint32_t*)key = i;
         uint8_t* get_value = level_dynamic_query(level, key);
         if(get_value == NULL)
             printf("Search the key %s: ERROR! \n", key);
@@ -53,8 +61,10 @@ int main(int argc, char* argv[])
     printf("The update test begins ...\n");
     for (i = 1; i < insert_num + 1; i ++)
     {
-        snprintf(key, KEY_LEN, "%ld", i);
-        snprintf(value, VALUE_LEN, "%ld", i*2);
+        *(uint32_t*)key = i;
+        *(uint32_t*)value = i*2;
+        //snprintf(key, KEY_LEN, "%ld", i);
+        //snprintf(value, VALUE_LEN, "%ld", i*2);
         if(level_update(level, key, value))
             printf("Update the value of the key %s: ERROR! \n", key);
    }
@@ -62,7 +72,8 @@ int main(int argc, char* argv[])
     printf("The deletion test begins ...\n");
     for (i = 1; i < insert_num + 1; i ++)
     {
-        snprintf(key, KEY_LEN, "%ld", i);
+        //snprintf(key, KEY_LEN, "%ld", i);
+        *(uint32_t*)key = i;
         if(level_delete(level, key))
             printf("Delete the key %s: ERROR! \n", key);
    }

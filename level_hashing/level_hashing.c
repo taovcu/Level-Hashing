@@ -5,7 +5,7 @@ Function: F_HASH()
         Compute the first hash value of a key-value item
 */
 uint64_t F_HASH(level_hash *level, const uint8_t *key) {
-    return (hash((void *)key, strlen(key), level->f_seed));
+    return (hash((void *)key, KEY_LEN, level->f_seed));
 }
 
 /*
@@ -13,7 +13,7 @@ Function: S_HASH()
         Compute the second hash value of a key-value item
 */
 uint64_t S_HASH(level_hash *level, const uint8_t *key) {
-    return (hash((void *)key, strlen(key), level->s_seed));
+    return (hash((void *)key, KEY_LEN, level->s_seed));
 }
 
 /*
@@ -301,13 +301,13 @@ uint8_t* level_static_query(level_hash *level, uint8_t *key)
     uint64_t i, j;
     for(i = 0; i < 2; i ++){
         for(j = 0; j < ASSOC_NUM; j ++){
-            if (level->buckets[i][f_idx].token[j] == 1&&strcmp(level->buckets[i][f_idx].slot[j].key, key) == 0)
+            if (level->buckets[i][f_idx].token[j] == 1&&strncmp(level->buckets[i][f_idx].slot[j].key, key, KEY_LEN) == 0)
             {
                 return level->buckets[i][f_idx].slot[j].value;
             }
         }
         for(j = 0; j < ASSOC_NUM; j ++){
-            if (level->buckets[i][s_idx].token[j] == 1&&strcmp(level->buckets[i][s_idx].slot[j].key, key) == 0)
+            if (level->buckets[i][s_idx].token[j] == 1&&strncmp(level->buckets[i][s_idx].slot[j].key, key, KEY_LEN) == 0)
             {
                 return level->buckets[i][s_idx].slot[j].value;
             }
@@ -335,7 +335,7 @@ uint8_t level_delete(level_hash *level, uint8_t *key)
     uint64_t i, j;
     for(i = 0; i < 2; i ++){
         for(j = 0; j < ASSOC_NUM; j ++){
-            if (level->buckets[i][f_idx].token[j] == 1&&strcmp(level->buckets[i][f_idx].slot[j].key, key) == 0)
+            if (level->buckets[i][f_idx].token[j] == 1&&strncmp(level->buckets[i][f_idx].slot[j].key, key, 4) == 0)
             {
                 level->buckets[i][f_idx].token[j] = 0;
                 level->level_item_num[i] --;
@@ -343,7 +343,7 @@ uint8_t level_delete(level_hash *level, uint8_t *key)
             }
         }
         for(j = 0; j < ASSOC_NUM; j ++){
-            if (level->buckets[i][s_idx].token[j] == 1&&strcmp(level->buckets[i][s_idx].slot[j].key, key) == 0)
+            if (level->buckets[i][s_idx].token[j] == 1&&strncmp(level->buckets[i][s_idx].slot[j].key, key, 4) == 0)
             {
                 level->buckets[i][s_idx].token[j] = 0;
                 level->level_item_num[i] --;
@@ -372,14 +372,14 @@ uint8_t level_update(level_hash *level, uint8_t *key, uint8_t *new_value)
     uint64_t i, j;
     for(i = 0; i < 2; i ++){
         for(j = 0; j < ASSOC_NUM; j ++){
-            if (level->buckets[i][f_idx].token[j] == 1&&strcmp(level->buckets[i][f_idx].slot[j].key, key) == 0)
+            if (level->buckets[i][f_idx].token[j] == 1&&strncmp(level->buckets[i][f_idx].slot[j].key, key, KEY_LEN) == 0)
             {
                 memcpy(level->buckets[i][f_idx].slot[j].value, new_value, VALUE_LEN);
                 return 0;
             }
         }
         for(j = 0; j < ASSOC_NUM; j ++){
-            if (level->buckets[i][s_idx].token[j] == 1&&strcmp(level->buckets[i][s_idx].slot[j].key, key) == 0)
+            if (level->buckets[i][s_idx].token[j] == 1&&strncmp(level->buckets[i][s_idx].slot[j].key, key, KEY_LEN) == 0)
             {
                 memcpy(level->buckets[i][s_idx].slot[j].value, new_value, VALUE_LEN);
                 return 0;
