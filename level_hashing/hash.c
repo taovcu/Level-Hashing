@@ -49,19 +49,8 @@ uint64_t key_hash_computation(const uint32_t data, uint64_t seed)
 {
     uint64_t hash;
 
-    hash = seed + NUMBER64_5;
-
-//    hash += (uint64_t)length;
-
+    hash = seed;
 	hash ^= (uint64_t)data * NUMBER64_1;
-	hash = shifting_hash(hash, 23) * NUMBER64_2 + NUMBER64_3;
-
-
-    hash ^= hash >> 33;
-    hash *= NUMBER64_2;
-    hash ^= hash >> 29;
-    hash *= NUMBER64_3;
-    hash ^= hash >> 32;
 
     return hash;
 }
