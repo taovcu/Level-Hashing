@@ -95,9 +95,9 @@ level_hash *level_init(uint32_t level_size)
     }
 
     printf("Level hashing: ASSOC_NUM %d, KEY_LEN %d, VALUE_LEN %d \n", ASSOC_NUM, KEY_LEN, VALUE_LEN);
-    printf("The number of top-level buckets: %ld\n", level->addr_capacity);
-    printf("The number of all buckets: %ld\n", level->total_capacity);
-    printf("The number of all entries: %ld\n", level->total_capacity*ASSOC_NUM);
+    printf("The number of top-level buckets: %d\n", level->addr_capacity);
+    printf("The number of all buckets: %d\n", level->total_capacity);
+    printf("The number of all entries: %d\n", level->total_capacity*ASSOC_NUM);
     printf("The level hash table initialization succeeds!\n");
     return level;
 }
@@ -105,8 +105,8 @@ level_hash *level_init(uint32_t level_size)
 /*
 Function: level_expand()
         Expand a level hash table in place;
-        Put a new level on top of the old hash table and only rehash the
-        items in the bottom level of the old hash table;
+        Put a new level on top of the od hash table and only rehash the
+        items in the bottom level of the od hash table;
 */
 void level_expand(level_hash *level) 
 {
@@ -124,7 +124,7 @@ void level_expand(level_hash *level)
     }
     uint32_t new_level_item_num = 0;
     
-    uint32_t old_idx;
+    uint32_t od_idx;
     uint32_t f_idx, s_idx;
     uint32_t key, value;
     uint8_t insertSuccess = 0;
@@ -132,11 +132,11 @@ void level_expand(level_hash *level)
     uint32_t pow_2_level_size_minus_1 = pow(2, level->level_size - 1);
     uint32_t addr_capacity = level->addr_capacity;
 
-    for (old_idx = 0; old_idx < pow_2_level_size_minus_1; old_idx++) {
+    for (od_idx = 0; od_idx < pow_2_level_size_minus_1; od_idx++) {
         for (uint32_t i = 0; i < ASSOC_NUM; i++) {
-            if (level->buckets[1][old_idx].token[i] == 1) {
-                key = level->buckets[1][old_idx].slot[i].key;
-                value = level->buckets[1][old_idx].slot[i].value;
+            if (level->buckets[1][od_idx].token[i] == 1) {
+                key = level->buckets[1][od_idx].slot[i].key;
+                value = level->buckets[1][od_idx].slot[i].value;
                 f_idx = F_IDX(F_HASH(level, key), addr_capacity);
                 s_idx = S_IDX(S_HASH(level, key), addr_capacity);
                 insertSuccess = 0;
@@ -165,7 +165,7 @@ void level_expand(level_hash *level)
                     printf("The expanding fails: 3\n"); exit(1);
                 }
 
-                level->buckets[1][old_idx].token[i] = 0;
+                level->buckets[1][od_idx].token[i] = 0;
             }
         }
     }
@@ -187,8 +187,8 @@ void level_expand(level_hash *level)
 /*
 Function: level_shrink()
         Shrink a level hash table in place;
-        Put a new level at the bottom of the old hash table and only rehash the
-        items in the top level of the old hash table;
+        Put a new level at the bottom of the od hash table and only rehash the
+        items in the top level of the od hash table;
 */
 void level_shrink(level_hash *level)
 {
@@ -218,17 +218,17 @@ void level_shrink(level_hash *level)
     level->addr_capacity = pow(2, level->level_size);
     level->total_capacity = pow(2, level->level_size) + pow(2, level->level_size - 1);
 
-    uint32_t old_idx, i;
-    for (old_idx = 0; old_idx < pow(2, level->level_size+1); old_idx ++) {
+    uint32_t od_idx, i;
+    for (od_idx = 0; od_idx < pow(2, level->level_size+1); od_idx ++) {
         for(i = 0; i < ASSOC_NUM; i ++){
-            if (interimBuckets[old_idx].token[i] == 1)
+            if (interimBuckets[od_idx].token[i] == 1)
             {
-                if(level_insert(level, interimBuckets[old_idx].slot[i].key, interimBuckets[old_idx].slot[i].value)){
+                if(level_insert(level, interimBuckets[od_idx].slot[i].key, interimBuckets[od_idx].slot[i].value)){
                         printf("The shrinking fails: 3\n");
                         exit(1);   
                 }
 
-            interimBuckets[old_idx].token[i] = 0;
+            interimBuckets[od_idx].token[i] = 0;
             }
         }
     } 
