@@ -15,7 +15,7 @@
 
 typedef struct U64_INT
 {
-    uint64_t v;
+    uint32_t v;
 } U64_INT;
 
 typedef struct U32_INT
@@ -23,13 +23,13 @@ typedef struct U32_INT
     uint32_t v;
 } U32_INT;
 
-uint64_t hash_read64_align(const void *ptr, uint32_t align)
+uint32_t hash_read64_align(const void *ptr, uint32_t align)
 {
     if (align == 0)
     {
         return TO64(ptr);
     }
-    return *(uint64_t *)ptr;
+    return *(uint32_t *)ptr;
 }
 
 uint32_t hash_read32_align(const void *ptr, uint32_t align)
@@ -45,12 +45,12 @@ uint32_t hash_read32_align(const void *ptr, uint32_t align)
 Function: string_key_hash_computation() 
         A hash function for string keys
 */
-uint64_t key_hash_computation(const uint32_t data, uint64_t seed)
+uint32_t key_hash_computation(const uint32_t data, uint32_t seed)
 {
-    uint64_t hash;
+    uint32_t hash;
 
     hash = seed;
-	hash ^= (uint64_t)data * NUMBER64_1;
+	hash ^= (uint32_t)data * NUMBER64_1;
 
     return hash;
 }

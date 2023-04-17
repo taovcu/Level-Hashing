@@ -12,7 +12,7 @@ int main(int argc, char* argv[])
     int insert_num = atoi(argv[2]);                     // INPUT: the number of items to be inserted
 
     level_hash *level = level_init(level_size);
-    uint64_t inserted = 0, i = 0;
+    uint32_t inserted = 0, i = 0;
     uint32_t key;
     uint32_t value, get_value;
 
