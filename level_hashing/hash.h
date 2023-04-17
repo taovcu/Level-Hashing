@@ -7,6 +7,5 @@ Function: hash()
         For example, Jenkins Hash is used for the first hash funciton, and murmur3 hash is used for
         the second hash funciton.
 */
-uint64_t hash(const void *data, uint64_t length, uint64_t seed);
-
+uint64_t key_hash_computation(const uint32_t data, uint64_t seed);
 

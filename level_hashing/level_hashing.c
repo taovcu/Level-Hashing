@@ -8,7 +8,7 @@ Function: F_HASH()
         Compute the first hash value of a key-value item
 */
 uint64_t F_HASH(level_hash *level, const uint32_t key) {
-	return (hash((void *)&key, KEY_LEN, level->f_seed));
+	return key_hash_computation(key, level->f_seed);
 }
 
 /*
@@ -16,7 +16,7 @@ Function: S_HASH()
         Compute the second hash value of a key-value item
 */
 uint64_t S_HASH(level_hash *level, const uint32_t key) {
-	return (hash((void *)&key, KEY_LEN, level->s_seed));
+	return key_hash_computation(key, level->s_seed);
 }
 
 /*
