@@ -292,8 +292,8 @@ uint32_t level_dynamic_query(level_hash *level, uint32_t key)
             s_idx = S_IDX(s_hash, level->addr_capacity);
         }
     }
-    /* need to be changed, otherwise value 0 cannot be supported*/
-    return 0;
+    /* indicate error, so application needs to make sure this is not a valid value*/
+    return 0xFFFFFFFF;
 }
 
 /*
@@ -326,7 +326,8 @@ uint32_t level_static_query(level_hash *level, uint32_t key)
         s_idx = S_IDX(s_hash, level->addr_capacity / 2);
     }
 
-    return 0;
+    /* indicate error, so application needs to make sure this is not a valid value*/
+    return 0xFFFFFFFF;
 }
 
 

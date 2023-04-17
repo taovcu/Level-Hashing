@@ -1,10 +1,13 @@
 #include "level_hashing.h"
+#include <time.h>
 
 /*  Test:
     This is a simple test example to test the creation, insertion, search, deletion, update in Level hashing
 */
 int main(int argc, char* argv[])                        
 {
+    clock_t start, stop;
+
     int level_size = atoi(argv[1]);                     // INPUT: the number of addressable buckets is 2^level_size
     int insert_num = atoi(argv[2]);                     // INPUT: the number of items to be inserted
 
@@ -13,16 +16,14 @@ int main(int argc, char* argv[])
     uint32_t key;
     uint32_t value, get_value;
 
-    for (i = 1; i < insert_num + 1; i ++)
+
+    printf("The insert test begins ...\n");
+    start = clock();
+    for (i = 0; i < insert_num; i ++)
     {
         key = i;
         value = i;
-        //snprintf(key, KEY_LEN, "%ld", i);
-        //snprintf(value, VALUE_LEN, "%ld", i);
-        if(level_static_query(level, key)) {
-            printf("Key %d already exist\n", key);
-            continue;
-	}
+
         if (!level_insert(level, key, value))                               
         {
             inserted ++;
@@ -36,47 +37,65 @@ int main(int argc, char* argv[])
             inserted ++;
         }
     }   
-    printf("%ld items are inserted\n", inserted);
+    stop = clock();
+    printf("%ld items are inserted in %f seconds \n", inserted, (double) (stop - start) / CLOCKS_PER_SEC);
+
 
     printf("The static search test begins ...\n");
-    for (i = 1; i < insert_num + 1; i ++)
+    start = clock();
+    for (i = 0; i < insert_num; i ++)
     {
-        //snprintf(key, KEY_LEN, "%ld", i);
         key = i;
         get_value = level_static_query(level, key);
-        if(get_value == 0)
+        if(get_value != i)
             printf("Search the key %u: ERROR! \n", key);
-   }
+    }
+    stop = clock();
+    printf("%ld items are static queried in %f seconds \n", insert_num, (double) (stop - start) / CLOCKS_PER_SEC);
 
     printf("The dynamic search test begins ...\n");
-    for (i = 1; i < insert_num + 1; i ++)
+    start = clock();
+    for (i = 0; i < insert_num; i ++)
     {
-        //snprintf(key, KEY_LEN, "%ld", i);
         key = i;
         get_value = level_dynamic_query(level, key);
-        if(get_value == 0)
+        if(get_value != i)
             printf("Search the key %u: ERROR! \n", key);
    }
+    stop = clock();
+    printf("%ld items are dyamic queried in %f seconds \n", insert_num, (double) (stop - start) / CLOCKS_PER_SEC);
 
     printf("The update test begins ...\n");
-    for (i = 1; i < insert_num + 1; i ++)
+    start = clock();
+    for (i = 0; i < insert_num; i ++)
     {
         key = i;
         value = i*2;
-        //snprintf(key, KEY_LEN, "%ld", i);
-        //snprintf(value, VALUE_LEN, "%ld", i*2);
         if(level_update(level, key, value))
             printf("Update the value of the key %u: ERROR! \n", key);
    }
+    stop = clock();
+    printf("%ld items are updated in %f seconds \n", insert_num, (double) (stop - start) / CLOCKS_PER_SEC);
+
+    printf("The static search to verify update test begins ...\n");
+    for (i = 0; i < insert_num; i ++)
+    {
+        key = i;
+        get_value = level_static_query(level, key);
+        if(get_value != 2*i)
+            printf("Search the key %u: ERROR! \n", key);
+   }
 
     printf("The deletion test begins ...\n");
-    for (i = 1; i < insert_num + 1; i ++)
+    start = clock();
+    for (i = 0; i < insert_num; i ++)
     {
-        //snprintf(key, KEY_LEN, "%ld", i);
         key = i;
         if(level_delete(level, key))
             printf("Delete the key %u: ERROR! \n", key);
    }
+    stop = clock();
+    printf("%ld items are deleted in %f seconds \n", insert_num, (double) (stop - start) / CLOCKS_PER_SEC);
 
     printf("The number of items stored in the level hash table: %ld\n", level->level_item_num[0]+level->level_item_num[1]);    
     level_destroy(level);
