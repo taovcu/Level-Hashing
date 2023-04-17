@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
         //snprintf(key, KEY_LEN, "%ld", i);
         //snprintf(value, VALUE_LEN, "%ld", i);
         if(level_static_query(level, key)) {
-            printf("Key %d already exist\n", i);
+            printf("Key %d already exist\n", *(uint32_t*)key);
             continue;
 	}
         if (!level_insert(level, key, value))                               
