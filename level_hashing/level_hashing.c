@@ -1,14 +1,15 @@
 #include "level_hashing.h"
 
-#define HASH_SEED1 0x9E3779B1
-#define HASH_SEED2 0x85EBCA87
+
+#define NUMBER64_1 11400714785074694791ULL
+
 
 /*
 Function: F_HASH()
         Compute the first hash value of a key-value item
 */
 uint64_t F_HASH(level_hash *level, const uint32_t key) {
-	return key_hash_computation(key, level->f_seed);
+    return (level->f_seed) ^ (key *  NUMBER64_1);
 }
 
 /*
@@ -16,7 +17,7 @@ Function: S_HASH()
         Compute the second hash value of a key-value item
 */
 uint64_t S_HASH(level_hash *level, const uint32_t key) {
-	return key_hash_computation(key, level->s_seed);
+	return (level->s_seed) ^ (key *  NUMBER64_1);
 }
 
 /*
@@ -124,47 +125,46 @@ void level_expand(level_hash *level)
     uint64_t new_level_item_num = 0;
     
     uint64_t old_idx;
-    for (old_idx = 0; old_idx < pow(2, level->level_size - 1); old_idx ++) {
-        uint64_t i, j;
-        for(i = 0; i < ASSOC_NUM; i ++){
-            if (level->buckets[1][old_idx].token[i] == 1)
-            {
-                uint32_t key = level->buckets[1][old_idx].slot[i].key;
-                uint32_t value = level->buckets[1][old_idx].slot[i].value;
+    uint64_t f_idx, s_idx;
+    uint32_t key, value;
+    uint8_t insertSuccess = 0;
 
-                uint64_t f_idx = F_IDX(F_HASH(level, key), level->addr_capacity);
-                uint64_t s_idx = S_IDX(S_HASH(level, key), level->addr_capacity);
+    uint64_t pow_2_level_size_minus_1 = pow(2, level->level_size - 1);
+    uint64_t addr_capacity = level->addr_capacity;
 
-                uint8_t insertSuccess = 0;
-                for(j = 0; j < ASSOC_NUM; j ++){                            
-                    /*  The rehashed item is inserted into the less-loaded bucket between 
-                        the two hash locations in the new level
-                    */
-                    if (newBuckets[f_idx].token[j] == 0)
-                    {
+    for (old_idx = 0; old_idx < pow_2_level_size_minus_1; old_idx++) {
+        for (uint64_t i = 0; i < ASSOC_NUM; i++) {
+            if (level->buckets[1][old_idx].token[i] == 1) {
+                key = level->buckets[1][old_idx].slot[i].key;
+                value = level->buckets[1][old_idx].slot[i].value;
+                f_idx = F_IDX(F_HASH(level, key), addr_capacity);
+                s_idx = S_IDX(S_HASH(level, key), addr_capacity);
+                insertSuccess = 0;
 
+                for (uint64_t j = 0; j < ASSOC_NUM; j++) {
+                    if (newBuckets[f_idx].token[j] == 0) {
                         newBuckets[f_idx].slot[j].key = key;
                         newBuckets[f_idx].slot[j].value = value;
                         newBuckets[f_idx].token[j] = 1;
                         insertSuccess = 1;
-                        new_level_item_num ++;
+                        new_level_item_num++;
                         break;
                     }
-                    if (newBuckets[s_idx].token[j] == 0)
-                    {
+                    if (newBuckets[s_idx].token[j] == 0) {
                         newBuckets[s_idx].slot[j].key = key;
                         newBuckets[s_idx].slot[j].value = value;
                         newBuckets[s_idx].token[j] = 1;
                         insertSuccess = 1;
-                        new_level_item_num ++;
+                        new_level_item_num++;
                         break;
                     }
                 }
-                if(!insertSuccess){
-                    printf("The expanding fails: 3\n");
-                    exit(1);                    
+
+                if (!insertSuccess) {
+                    // Handle error condition
+                    printf("The expanding fails: 3\n"); exit(1);
                 }
-                
+
                 level->buckets[1][old_idx].token[i] = 0;
             }
         }
@@ -417,33 +417,45 @@ uint8_t level_insert(level_hash *level, uint32_t key, uint32_t value)
     uint64_t i, j;
     int empty_location;
 
+    // Use a local variable to store the pointer to the buckets array
+    level_bucket *buckets = level->buckets[0];
+
     for(i = 0; i < 2; i ++){
-        for(j = 0; j < ASSOC_NUM; j ++){        
-            /*  The new item is inserted into the less-loaded bucket between 
-                the two hash locations in each level           
-            */      
-            if (level->buckets[i][f_idx].token[j] == 0)
+        // Use a local variable to store the pointer to the first bucket
+    	level_bucket *f_bucket = &buckets[f_idx];
+        // Use a local variable to store the pointer to the second bucket
+    	level_bucket *s_bucket = &buckets[s_idx];
+        for(j = 0; j < ASSOC_NUM; j ++){
+            /*  The new item is inserted into the less-loaded bucket between
+                the two hash locations in each level
+            */
+            if (f_bucket->token[j] == 0)
             {
-                level->buckets[i][f_idx].slot[j].key = key;
-                level->buckets[i][f_idx].slot[j].value = value;
-                level->buckets[i][f_idx].token[j] = 1;
+                f_bucket->slot[j].key = key;
+                f_bucket->slot[j].value = value;
+                f_bucket->token[j] = 1;
                 level->level_item_num[i] ++;
                 return 0;
             }
-            if (level->buckets[i][s_idx].token[j] == 0) 
+            if (s_bucket->token[j] == 0)
             {
-                level->buckets[i][s_idx].slot[j].key = key;
-                level->buckets[i][s_idx].slot[j].value = value;
-                level->buckets[i][s_idx].token[j] = 1;
+                s_bucket->slot[j].key = key;
+                s_bucket->slot[j].value = value;
+                s_bucket->token[j] = 1;
                 level->level_item_num[i] ++;
                 return 0;
             }
         }
-        
+
+        // Update the pointers to the buckets array and the indices for the next level
+        buckets = level->buckets[1];
         f_idx = F_IDX(f_hash, level->addr_capacity / 2);
         s_idx = S_IDX(s_hash, level->addr_capacity / 2);
     }
 
+
+    // Restore the pointers and indices for the first level
+    buckets = level->buckets[0];
     f_idx = F_IDX(f_hash, level->addr_capacity);
     s_idx = S_IDX(s_hash, level->addr_capacity);
     
@@ -455,6 +467,8 @@ uint8_t level_insert(level_hash *level, uint32_t key, uint32_t value)
             return 0;
         }
 
+        // Update the pointers and indices for the next level
+        buckets = level->buckets[1];
         f_idx = F_IDX(f_hash, level->addr_capacity/2);
         s_idx = S_IDX(s_hash, level->addr_capacity/2);        
     }
@@ -462,24 +476,22 @@ uint8_t level_insert(level_hash *level, uint32_t key, uint32_t value)
     if(level->level_expand_time > 0){
         empty_location = b2t_movement(level, f_idx);
         if(empty_location != -1){
-            level->buckets[1][f_idx].slot[empty_location].key = key;
-            level->buckets[1][f_idx].slot[empty_location].value = value;
-            level->buckets[1][f_idx].token[empty_location] = 1;
-            level->level_item_num[1] ++;
+            buckets[f_idx].slot[empty_location].key = key;
+            buckets[f_idx].slot[empty_location].value = value;
+            buckets[f_idx].token[empty_location] = 1;
             return 0;
         }
 
         empty_location = b2t_movement(level, s_idx);
         if(empty_location != -1){
-            level->buckets[1][s_idx].slot[empty_location].key = key;
-            level->buckets[1][s_idx].slot[empty_location].value = value;
-            level->buckets[1][s_idx].token[empty_location] = 1;
-            level->level_item_num[1] ++;
+            buckets[s_idx].slot[empty_location].key = key;
+            buckets[s_idx].slot[empty_location].value = value;
+            buckets[s_idx].token[empty_location] = 1;
             return 0;
         }
     }
 
-    return 1;
+    return 1; // Insertion fails
 }
 
 /*
@@ -490,9 +502,15 @@ uint8_t try_movement(level_hash *level, uint64_t idx, uint64_t level_num, uint32
 {
     uint64_t i, j, jdx;
 
+    // Use a local variable to store the pointer to the buckets array
+    level_bucket *buckets = level->buckets[level_num];
+
+    // Use a local variable to store the pointer to the current bucket
+    level_bucket *cur_bucket = &buckets[idx];
+
     for(i = 0; i < ASSOC_NUM; i ++){
-        uint32_t m_key = level->buckets[level_num][idx].slot[i].key;
-        uint32_t m_value = level->buckets[level_num][idx].slot[i].value;
+        uint32_t m_key = cur_bucket->slot[i].key;
+        uint32_t m_value = cur_bucket->slot[i].value;
         uint64_t f_hash = F_HASH(level, m_key);
         uint64_t s_hash = S_HASH(level, m_key);
         uint64_t f_idx = F_IDX(f_hash, level->addr_capacity/(1+level_num));
@@ -503,18 +521,21 @@ uint8_t try_movement(level_hash *level, uint64_t idx, uint64_t level_num, uint32
         else
             jdx = f_idx;
 
+        // Use a local variable to store the pointer to the other bucket
+        level_bucket *other_bucket = &buckets[jdx];
+
         for(j = 0; j < ASSOC_NUM; j ++){
-            if (level->buckets[level_num][jdx].token[j] == 0)
+            if (other_bucket->token[j] == 0)
             {
-                level->buckets[level_num][jdx].slot[j].key = m_key;
-                level->buckets[level_num][jdx].slot[j].value = m_value;
-                level->buckets[level_num][jdx].token[j] = 1;
-                level->buckets[level_num][idx].token[i] = 0;
+                other_bucket->slot[j].key = m_key;
+                other_bucket->slot[j].value = m_value;
+                other_bucket->token[j] = 1;
+                cur_bucket->token[i] = 0;
                 // The movement is finished and then the new item is inserted
 
-                level->buckets[level_num][idx].slot[i].key = key;
-                level->buckets[level_num][idx].slot[i].value = value;
-                level->buckets[level_num][idx].token[i] = 1;
+                cur_bucket->slot[i].key = key;
+                cur_bucket->slot[i].value = value;
+                cur_bucket->token[i] = 1;
                 level->level_item_num[level_num] ++;
                 
                 return 0;
@@ -534,16 +555,16 @@ int b2t_movement(level_hash *level, uint64_t idx)
     uint32_t key, value;
     uint64_t s_hash, f_hash;
     uint64_t s_idx, f_idx;
-    
+
     uint64_t i, j;
     for(i = 0; i < ASSOC_NUM; i ++){
         key = level->buckets[1][idx].slot[i].key;
         value = level->buckets[1][idx].slot[i].value;
         f_hash = F_HASH(level, key);
-        s_hash = S_HASH(level, key);  
+        s_hash = S_HASH(level, key);
         f_idx = F_IDX(f_hash, level->addr_capacity);
         s_idx = S_IDX(s_hash, level->addr_capacity);
-    
+
         for(j = 0; j < ASSOC_NUM; j ++){
             if (level->buckets[0][f_idx].token[j] == 0)
             {
@@ -570,6 +591,8 @@ int b2t_movement(level_hash *level, uint64_t idx)
 
     return -1;
 }
+
+
 
 /*
 Function: level_destroy() 

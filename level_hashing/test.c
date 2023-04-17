@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
     start = clock();
     for (i = 0; i < insert_num; i ++)
     {
-    	l2p[i] = i;
+    	*(l2p+i) = i;
     }   
     stop = clock();
     printf("%ld items are inserted in the array in %f seconds \n", inserted, (double) (stop - start) / CLOCKS_PER_SEC);
