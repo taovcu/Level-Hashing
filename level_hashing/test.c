@@ -16,15 +16,16 @@ int main(int argc, char* argv[])
     uint32_t key;
     uint32_t value, get_value;
 
+    // array access
+    uint32_t *l2p = (uint32_t *)calloc(insert_num, sizeof(uint32_t));
 
-    printf("The insert test begins ...\n");
+    printf("The level hashing insert test begins ...\n");
     start = clock();
     for (i = 0; i < insert_num; i ++)
     {
-        key = i;
-        value = i;
-
-        if (!level_insert(level, key, value))                               
+    	key = i;
+    	value = i;
+        if (!level_insert(level, key, value))
         {
             inserted ++;
         }else
@@ -36,10 +37,18 @@ int main(int argc, char* argv[])
             level_insert(level, key, value);
             inserted ++;
         }
+    }
+    stop = clock();
+    printf("%ld items are inserted in level hashing in %f seconds \n", inserted, (double) (stop - start) / CLOCKS_PER_SEC);
+
+    printf("The array insert test begins ...\n");
+    start = clock();
+    for (i = 0; i < insert_num; i ++)
+    {
+    	l2p[i] = i;
     }   
     stop = clock();
-    printf("%ld items are inserted in %f seconds \n", inserted, (double) (stop - start) / CLOCKS_PER_SEC);
-
+    printf("%ld items are inserted in the array in %f seconds \n", inserted, (double) (stop - start) / CLOCKS_PER_SEC);
 
     printf("The static search test begins ...\n");
     start = clock();
@@ -63,7 +72,7 @@ int main(int argc, char* argv[])
             printf("Search the key %u: ERROR! \n", key);
    }
     stop = clock();
-    printf("%ld items are dyamic queried in %f seconds \n", insert_num, (double) (stop - start) / CLOCKS_PER_SEC);
+    printf("%ld items are dynamic queried in %f seconds \n", insert_num, (double) (stop - start) / CLOCKS_PER_SEC);
 
     printf("The update test begins ...\n");
     start = clock();
