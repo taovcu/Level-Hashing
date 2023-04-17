@@ -10,17 +10,17 @@ int main(int argc, char* argv[])
 
     level_hash *level = level_init(level_size);
     uint64_t inserted = 0, i = 0;
-    uint8_t key[KEY_LEN];
-    uint8_t value[VALUE_LEN];
+    uint32_t key;
+    uint32_t value, get_value;
 
     for (i = 1; i < insert_num + 1; i ++)
     {
-        *(uint32_t*)key = i;
-        *(uint32_t*)value = i;
+        key = i;
+        value = i;
         //snprintf(key, KEY_LEN, "%ld", i);
         //snprintf(value, VALUE_LEN, "%ld", i);
         if(level_static_query(level, key)) {
-            printf("Key %d already exist\n", *(uint32_t*)key);
+            printf("Key %d already exist\n", key);
             continue;
 	}
         if (!level_insert(level, key, value))                               
@@ -42,40 +42,40 @@ int main(int argc, char* argv[])
     for (i = 1; i < insert_num + 1; i ++)
     {
         //snprintf(key, KEY_LEN, "%ld", i);
-        *(uint32_t*)key = i;
-        uint8_t* get_value = level_static_query(level, key);
-        if(get_value == NULL)
-            printf("Search the key %s: ERROR! \n", key);
+        key = i;
+        get_value = level_static_query(level, key);
+        if(get_value == 0)
+            printf("Search the key %u: ERROR! \n", key);
    }
 
     printf("The dynamic search test begins ...\n");
     for (i = 1; i < insert_num + 1; i ++)
     {
         //snprintf(key, KEY_LEN, "%ld", i);
-        *(uint32_t*)key = i;
-        uint8_t* get_value = level_dynamic_query(level, key);
-        if(get_value == NULL)
-            printf("Search the key %s: ERROR! \n", key);
+        key = i;
+        get_value = level_dynamic_query(level, key);
+        if(get_value == 0)
+            printf("Search the key %u: ERROR! \n", key);
    }
 
     printf("The update test begins ...\n");
     for (i = 1; i < insert_num + 1; i ++)
     {
-        *(uint32_t*)key = i;
-        *(uint32_t*)value = i*2;
+        key = i;
+        value = i*2;
         //snprintf(key, KEY_LEN, "%ld", i);
         //snprintf(value, VALUE_LEN, "%ld", i*2);
         if(level_update(level, key, value))
-            printf("Update the value of the key %s: ERROR! \n", key);
+            printf("Update the value of the key %u: ERROR! \n", key);
    }
 
     printf("The deletion test begins ...\n");
     for (i = 1; i < insert_num + 1; i ++)
     {
         //snprintf(key, KEY_LEN, "%ld", i);
-        *(uint32_t*)key = i;
+        key = i;
         if(level_delete(level, key))
-            printf("Delete the key %s: ERROR! \n", key);
+            printf("Delete the key %u: ERROR! \n", key);
    }
 
     printf("The number of items stored in the level hash table: %ld\n", level->level_item_num[0]+level->level_item_num[1]);    
