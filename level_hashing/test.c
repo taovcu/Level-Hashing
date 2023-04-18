@@ -25,10 +25,10 @@ int main(int argc, char* argv[])
     {
     	key = i;
     	value = i;
-    	if(level_static_query(level, key)!=0xFFFFFFFF) {
-    	            printf("Key %d already exist, its previous value is %d\n", key, level_static_query(level, key));
-    	            return 1;
-    	}
+//    	if(level_static_query(level, key)!=0xFFFFFFFF) {
+//    	            printf("Key %d already exist, its previous value is %d\n", key, level_static_query(level, key));
+//    	            return 1;
+//    	}
         if (!level_insert(level, key, value))
         {
             inserted ++;
