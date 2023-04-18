@@ -95,6 +95,9 @@ int main(int argc, char* argv[])
             printf("Search the key %u: ERROR! \n", key);
    }
 
+    printf("The number of items stored in the first level hash table: 0x%x\n", level->level_item_num[0]);
+    printf("The number of items stored in the second level hash table: 0x%x\n", level->level_item_num[1]);
+
     printf("The deletion test begins ...\n");
     start = clock();
     for (i = 0; i < insert_num; i ++)
@@ -106,7 +109,9 @@ int main(int argc, char* argv[])
     stop = clock();
     printf("%d items are deleted in %f seconds \n", insert_num, (double) (stop - start) / CLOCKS_PER_SEC);
 
-    printf("The number of items stored in the level hash table: %d\n", level->level_item_num[0]+level->level_item_num[1]);    
+    printf("The number of items stored in the level hash table: %d\n", level->level_item_num[0] + level->level_item_num[1]);
+    printf("The number of items stored in the first level hash table: 0x%x\n", level->level_item_num[0]);
+    printf("The number of items stored in the second level hash table: 0x%x\n", level->level_item_num[1]);
     level_destroy(level);
 
     return 0;

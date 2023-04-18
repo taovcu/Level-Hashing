@@ -51,8 +51,8 @@ void level_expand(level_hash *level);
 
 void level_shrink(level_hash *level);
 
-uint8_t try_movement(level_hash *level, uint32_t idx, uint32_t level_num, uint32_t key, uint32_t value);
+//uint8_t try_movement(level_hash *level, uint32_t idx, uint32_t level_num, uint32_t key, uint32_t value);
 
-int b2t_movement(level_hash *level, uint32_t idx);
+//int b2t_movement(level_hash *level, uint32_t idx);
 
 void level_destroy(level_hash *level);
